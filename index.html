@@ -1,25 +1,34 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Nhập Key Admin Cấp</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tool AI Tài Xỉu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: monospace;
-      height: 100vh;
-      background: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
-      background-size: cover;
+
+    html, body {
+  margin: 0;
+  padding: 0;
+  font-family: monospace;
+  min-height: 100vh;
+  width: 100%;
+  background: url('https://images.unsplash.com/photo-1506765515384-028b60a970df?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+  background-size: cover;
+  color: #d09eff;
+}
+
+
+    #keyInput {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      color: #d09eff;
+      height: 100vh;
+      transform: translateY(-2mm);
     }
-    .container {
+
+    .input-box {
       background: rgba(0, 0, 0, 0.3);
       padding: 30px 40px;
       border-radius: 12px;
@@ -30,14 +39,49 @@
       max-width: 400px;
       width: 100%;
     }
-    h2 {
-      margin-bottom: 20px;
-      color: #e2b6ff;
-      text-shadow: 0 0 10px #a94eff;
+
+    .top-bar {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 20px;
+      margin: 90px auto 20px;
+      max-width: 500px;
+      border: 2px solid #a94eff;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 0 15px #a94eff;
     }
-    input[type="text"] {
+
+    .admin-logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 10px #fff;
+    }
+
+    .admin-title {
+      margin: 10px 0 5px;
+      font-size: 30px;
+      color: #ffccff;
+      text-shadow: 0 0 8px #ff33cc;
+      font-weight: bold;
+    }
+
+    .admin-text {
+      color: #ffffff;
+      font-size: 16px;
+      margin-top: 10px;
+      text-shadow: 0 0 4px #a94eff;
+    }
+
+    .input-wrapper {
+      position: relative;
       width: 100%;
-      padding: 12px;
+    }
+
+    .input-wrapper input[type="text"] {
+      width: 100%;
+      padding: 12px 40px 12px 12px;
       font-size: 16px;
       border: 2px solid #a94eff;
       border-radius: 6px;
@@ -47,6 +91,16 @@
       text-align: center;
       margin-bottom: 10px;
     }
+
+    .paste-icon {
+      position: absolute;
+      right: 10px;
+      top: 8px;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
     button {
       background: #a94eff;
       border: none;
@@ -57,18 +111,27 @@
       cursor: pointer;
       transition: background 0.3s;
     }
+
     button:hover {
       background: #c266ff;
     }
-    .message { margin-top: 15px; font-weight: bold; }
-    #home { display: none; }
-    .button-grid {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 20px;
+
+    #home {
+      display: none;
+      width: 100%;
     }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      justify-items: center;
+      margin-top: 20px;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     .square-btn {
       width: 130px;
       height: 80px;
@@ -80,6 +143,7 @@
       box-shadow: 0 0 10px #a94eff;
       font-size: 16px;
     }
+
     .profile-img {
       position: fixed;
       top: 15px;
@@ -92,6 +156,7 @@
       cursor: pointer;
       z-index: 1000;
     }
+
     #profileInfo {
       position: fixed;
       top: 80px;
@@ -107,7 +172,24 @@
       max-width: 240px;
       z-index: 1000;
     }
-    #profileArea { display: none; }
+
+    #profileArea {
+      display: none;
+    }
+
+    .game-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid #a94eff;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #a94eff;
+      padding: 25px;
+      max-width: 500px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -118,17 +200,32 @@
     <div id="profileInfo"></div>
   </div>
 
-  <div class="container">
-    <div id="keyInput" class="input-box">
+  <!-- KHUNG NHẬP KEY -->
+  <div id="keyInput">
+    <div class="input-box">
       <h2>Liên Hệ Admin Để Buy Key !</h2>
-      <input type="text" id="keyValue" placeholder="Nhập key..." />
-      <br />
+      <div class="input-wrapper">
+        <input type="text" id="keyValue" placeholder="Nhập key..." />
+        <span class="paste-icon" onclick="pasteKey()"></span>
+      </div>
       <button onclick="checkKey()">Xác Nhận</button>
       <p id="status" style="color: red; margin-top: 10px;"></p>
     </div>
+  </div>
 
-    <div id="home" class="home-box">
-      <h2>Chọn chức năng</h2>
+  <!-- TRANG CHỦ SAU KHI NHẬP KEY -->
+  <div id="home">
+    <!-- KHUNG THÔNG TIN ADMIN -->
+    <div class="top-bar">
+      <h1 class="admin-title">𝑲𝒂𝒏𝑯𝒂𝒐𝑻𝑻</h1>
+      <div class="admin-text" id="adminText">
+        <p>Tool AI Dự Đoán Phân Tích Dữ liệu Game Tài Xỉu </p>
+      </div>
+    </div>
+
+    <!-- KHUNG CHỌN GAME -->
+    <div class="game-box">
+      <h2></h2>
       <div class="button-grid" id="toolButtons"></div>
     </div>
   </div>
@@ -149,7 +246,13 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let currentKey = "";
+    let currentKey = {};
+
+    function pasteKey() {
+      navigator.clipboard.readText().then(text => {
+        document.getElementById("keyValue").value = text;
+      });
+    }
 
     function checkKey() {
       const input = document.getElementById("keyValue").value.trim();
@@ -170,20 +273,29 @@
         let found = false;
         Object.values(keys).forEach(k => {
           if (k.name === input) {
-            found = true;
             currentKey = k;
+            found = true;
           }
         });
 
-        if (found) {
-          document.getElementById("keyInput").style.display = "none";
-          document.getElementById("home").style.display = "block";
-          document.getElementById("profileArea").style.display = "block";
-          loadToolButtons();
-          showProfileInfo();
-        } else {
+        if (!found) {
           status.textContent = "Sai Key ! Cần Liên Hệ Admin";
+          return;
         }
+
+        const maxDevices = parseInt(currentKey.device || 1);
+        const currentDevices = parseInt(currentKey.using || 0);
+
+        if (currentDevices >= maxDevices) {
+          status.textContent = "Thiết Bị Đã Đầy";
+          return;
+        }
+
+        document.getElementById("keyInput").style.display = "none";
+        document.getElementById("home").style.display = "block";
+        document.getElementById("profileArea").style.display = "block";
+        loadToolButtons();
+        showProfileInfo();
       });
     }
 
@@ -221,6 +333,10 @@
       const box = document.getElementById("profileInfo");
       box.style.display = box.style.display === "block" ? "none" : "block";
     }
+
+    document.getElementById("keyValue").addEventListener("focus", () => {
+      window.scrollTo(0, 0);
+    });
   </script>
 </body>
 </html>
