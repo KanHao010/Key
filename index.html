@@ -1,0 +1,226 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Nhập Key Admin Cấp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: monospace;
+      height: 100vh;
+      background: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #d09eff;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 30px 40px;
+      border-radius: 12px;
+      text-align: center;
+      border: 2px solid #a94eff;
+      box-shadow: 0 0 25px #a94eff;
+      backdrop-filter: blur(4px);
+      max-width: 400px;
+      width: 100%;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #e2b6ff;
+      text-shadow: 0 0 10px #a94eff;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #a94eff;
+      border-radius: 6px;
+      outline: none;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    button {
+      background: #a94eff;
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #c266ff;
+    }
+    .message { margin-top: 15px; font-weight: bold; }
+    #home { display: none; }
+    .button-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .square-btn {
+      width: 130px;
+      height: 80px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid #a94eff;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: bold;
+      box-shadow: 0 0 10px #a94eff;
+      font-size: 16px;
+    }
+    .profile-img {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 8px #fff;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    #profileInfo {
+      position: fixed;
+      top: 80px;
+      right: 15px;
+      background: rgba(0, 0, 0, 0.9);
+      color: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      display: none;
+      border: 1px solid #a94eff;
+      box-shadow: 0 0 10px #a94eff;
+      text-align: left;
+      max-width: 240px;
+      z-index: 1000;
+    }
+    #profileArea { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Hồ sơ -->
+  <div id="profileArea">
+    <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" class="profile-img" onclick="toggleProfile()" />
+    <div id="profileInfo"></div>
+  </div>
+
+  <div class="container">
+    <div id="keyInput" class="input-box">
+      <h2>Liên Hệ Admin Để Buy Key !</h2>
+      <input type="text" id="keyValue" placeholder="Nhập key..." />
+      <br />
+      <button onclick="checkKey()">Xác Nhận</button>
+      <p id="status" style="color: red; margin-top: 10px;"></p>
+    </div>
+
+    <div id="home" class="home-box">
+      <h2>Chọn chức năng</h2>
+      <div class="button-grid" id="toolButtons"></div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAFXxzi4w036bzN_pdS5rZ969BOMNpDpE",
+      authDomain: "kanhao010.firebaseapp.com",
+      databaseURL: "https://kanhao010-default-rtdb.firebaseio.com",
+      projectId: "kanhao010",
+      storageBucket: "kanhao010.appspot.com",
+      messagingSenderId: "363577281330",
+      appId: "1:363577281330:web:4b9df52d03d4ffc991252b"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentKey = "";
+
+    function checkKey() {
+      const input = document.getElementById("keyValue").value.trim();
+      const status = document.getElementById("status");
+
+      if (input === "") {
+        status.textContent = "Cần Nhập Key Để Sử Dụng";
+        return;
+      }
+
+      db.ref("adminKeys").once("value", snapshot => {
+        const keys = snapshot.val();
+        if (!keys) {
+          status.textContent = "Không có key nào!";
+          return;
+        }
+
+        let found = false;
+        Object.values(keys).forEach(k => {
+          if (k.name === input) {
+            found = true;
+            currentKey = k;
+          }
+        });
+
+        if (found) {
+          document.getElementById("keyInput").style.display = "none";
+          document.getElementById("home").style.display = "block";
+          document.getElementById("profileArea").style.display = "block";
+          loadToolButtons();
+          showProfileInfo();
+        } else {
+          status.textContent = "Sai Key ! Cần Liên Hệ Admin";
+        }
+      });
+    }
+
+    function loadToolButtons() {
+      const container = document.getElementById("toolButtons");
+      container.innerHTML = "";
+
+      db.ref("adminLinks").once("value", snapshot => {
+        const links = snapshot.val();
+        if (!links) {
+          container.innerHTML = "<i>Chưa có chức năng nào được thêm!</i>";
+          return;
+        }
+
+        Object.values(links).forEach(link => {
+          const btn = document.createElement("button");
+          btn.className = "square-btn";
+          btn.textContent = link.name;
+          btn.onclick = () => window.open(link.link, "_blank");
+          container.appendChild(btn);
+        });
+      });
+    }
+
+    function showProfileInfo() {
+      const html = `
+        <b>🔑 Key:</b> ${currentKey.name}<br/>
+        <b>⏳ Hạn sử dụng:</b> ${currentKey.expire}<br/>
+        <b>📱 Thiết bị:</b> ${currentKey.device}<br/>
+      `;
+      document.getElementById("profileInfo").innerHTML = html;
+    }
+
+    function toggleProfile() {
+      const box = document.getElementById("profileInfo");
+      box.style.display = box.style.display === "block" ? "none" : "block";
+    }
+  </script>
+</body>
+</html>
